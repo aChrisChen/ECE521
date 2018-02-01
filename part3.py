@@ -5,7 +5,6 @@ from part1 import dist
 from part2 import mse
 from collections import defaultdict
 
-
 def data_segmentation(data_path, target_path, task):
     # task = 0 >> select the name ID targets for face recognition task
     # task = 1 >> select the gender ID targets for gender recognition task
@@ -34,21 +33,21 @@ def data_segmentation(data_path, target_path, task):
     
     return trainData, validData, testData, trainTarget, validTarget, testTarget
 
-
+'''
+@parameters: distVector(N1 x N2), K(int32), trainTar(N2 x 1)
+@return: (N1 x K)
+'''
 def get_knn_target_matrix(distVector, K, trainTar):
-    '''
-
-    :param distVector: N1 * N2 (N1: new data; N2: train data)
-    :param K:
-    :param trainTar: N2 * 1
-    :return: knnTarget: N1 * K (translate index to trainTar[index])
-    '''
     knnDist, knnIndex = tf.nn.top_k(-distVector, k=K)
     knnIndex = tf.expand_dims(knnIndex, 2) # N1 * K * 1
     knnTarget = tf.gather_nd(trainTar, knnIndex) # N1 * K * 1
     knnTarget = tf.reduce_sum(knnTarget, 2) # N1 * K
     return knnTarget
 
+'''
+@parameters: knnTarget(N1 x K), rowIndex(int32)
+@return: (K x 1)
+'''
 def predict_1d_knn_target(knnTarget, rowIndex):
     # Apply majority vote to 'rowIndex'th row (K-length 1D vector)
     row = tf.gather_nd(knnTarget, rowIndex)
@@ -56,7 +55,6 @@ def predict_1d_knn_target(knnTarget, rowIndex):
     majorCount, majorIndex = tf.nn.top_k(count, k=1)
     predRowTarget = tf.gather(y, majorIndex)
     return predRowTarget
-
 
 def buildGraph():
     # Variable Creation
@@ -76,16 +74,12 @@ def buildGraph():
 
     return trainX, trainY, newX, newY, k, rowIndex, predY, knnMatrix,predRowY,lossMSE, accuracy
 
-
-#
-#
-# # determine the best K value based on validation set
-# k_best = kvec[np.argmin(mseValidList)]
-# print("Best k using validation set is k=%d"%k_best)
-
 if __name__ == '__main__':
     # Load Data
-    trainData, validData, testData, trainTarget, validTarget, testTarget = data_segmentation("data.npy", "target.npy",0)
+    # task = 0 >> select the name ID targets for face recognition task
+    # task = 1 >> select the gender ID targets for gender recognition task
+    task = 1
+    trainData, validData, testData, trainTarget, validTarget, testTarget = data_segmentation("data.npy", "target.npy",task)
     kvec = [1, 5, 10, 25, 50, 100, 200]
 
     # Load computation_Graph
@@ -94,6 +88,7 @@ if __name__ == '__main__':
     # Initialization
     sess = tf.InteractiveSession()
     mseResult = defaultdict(list)
+    accuracyResult = defaultdict(list)
     sess.run(tf.local_variables_initializer()) # to use tf.metrics.accuracy
 
     for kc in kvec:
@@ -127,4 +122,24 @@ if __name__ == '__main__':
         # compute correction rate
         corr_valid = sess.run(accuracy, feed_dict={predY: predictionTargetResult['validation'], newY: validTarget})
         corr_test = sess.run(accuracy, feed_dict={predY: predictionTargetResult['test'], newY: testTarget})
+        accuracyResult['validation'].append(corr_valid[1])
+        accuracyResult['test'].append(corr_test[1])
         print("\t validation corr: %f, test corr: %f" % (corr_valid[1], corr_test[1]))
+
+# determine the best K value based on validation set
+k_best = kvec[np.argmin(mseResult['validation'])]
+print("Best k using validation set is k=%d"%k_best)
+
+plt.clf()
+plt.plot(kvec, mseResult['validation'], label='validation MSE')
+plt.plot(kvec, mseResult['test'], label='test MSE')
+plt.legend()
+plt.title("validation MSE and test MSE against varying k")
+plt.savefig('part3_MSE(%d).png'%task)
+
+plt.clf()
+plt.plot(kvec, accuracyResult['validation'], label='validation accuracy')
+plt.plot(kvec, accuracyResult['test'], label='test accuracy')
+plt.legend()
+plt.title("validation accuracy and test accuracy against varying k")
+plt.savefig('part3_accuracy(%d).png'%task)
