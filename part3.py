@@ -94,7 +94,7 @@ if __name__ == '__main__':
     # Initialization
     sess = tf.InteractiveSession()
     mseResult = defaultdict(list)
-
+    sess.run(tf.local_variables_initializer()) # to use tf.metrics.accuracy
 
     for kc in kvec:
         # brand new 1-D prediction vector (N1-length) for each K value
@@ -127,4 +127,4 @@ if __name__ == '__main__':
         # compute correction rate
         corr_valid = sess.run(accuracy, feed_dict={predY: predictionTargetResult['validation'], newY: validTarget})
         corr_test = sess.run(accuracy, feed_dict={predY: predictionTargetResult['test'], newY: testTarget})
-        print("\t validation corr: %f, test corr: %f" % (corr_valid, corr_test))
+        print("\t validation corr: %f, test corr: %f" % (corr_valid[1], corr_test[1]))
