@@ -16,50 +16,29 @@ def loadData():
 
     return trainData, trainTarget, validData, validTarget, testData, testTarget
 
-
+'''
+@parameters: distVector(N1 x N2), K(int32)
+@return: (N1 x N2)
+'''
 def knn(distVector, K=1):
-    '''
-
-    :param distVector: N1 * N2
-    :param K: Constant
-    :return: N1 * N2
-
-
-    knnDist, knnIndex: N1 * K
-    tf.expand_dims(knnIndex, 2): N1 * K * 1
-    tf.reshape(tf.range(numTrainData),[1,1,-1]): 1 * 1 * N2
-    tf.equal(tf.expand_dims(knnIndex, 2), tf.reshape(tf.range(N2), [1,1,-1])): N1 * K * N2
-                                                                         r: N1 * N2
-    '''
-
     knnDist, knnIndex = tf.nn.top_k(-distVector, k=K)
     numTrainData = tf.shape(distVector)[1]
     r = tf.reduce_sum(tf.to_float(tf.equal(tf.expand_dims(knnIndex, 2), tf.reshape(tf.range(numTrainData), [1,1,-1]))), 1)
     return r/tf.to_float(K)
 
-
+'''
+@parameters: r(N1 x N2), trainTar(N2 x 1)
+@return: (N1 x 1)
+'''
 def predKnn(r, trainTar):
-
-    '''
-
-    :param r: N1 * N2
-    :param trainTar: N2 * 1
-    :return: N1 * 1
-
-    '''
     return tf.matmul(r, trainTar)
 
-
+'''
+@parameters: y(N1 x 1), y_(N1 x 1)
+@return: (float64)
+'''
 def mse(y, y_):
-    '''
-
-    :param y: N1 * 1
-    :param y_: N1 * 1
-    :return: 1
-    '''
     return tf.reduce_mean(tf.reduce_sum((y - y_)**2, 1)) / 2
-
-
 
 def buildGraph():
     # Variabe Creation
@@ -74,8 +53,6 @@ def buildGraph():
     lossMSE = mse(predY, newY)
 
     return trainX, trainY, newX, newY, k, predY, lossMSE
-
-
 
 
 if __name__ == '__main__':
@@ -110,7 +87,8 @@ if __name__ == '__main__':
     plt.plot(k_choice, MSE_result['validation'],label='validation MSE')
     plt.plot(k_choice, MSE_result['test'], label='test MSE')
     plt.legend()
-    plt.savefig('MSE.png')
+    plt.title("validation MSE and test MSE against varying k")
+    plt.savefig('part2_MSE.png')
 
     # Prediction and Regression
     X = np.linspace(0.0, 11.0, num=1000)[:, np.newaxis]
@@ -123,11 +101,3 @@ if __name__ == '__main__':
         plt.plot(X, prediction, '-')
         plt.title("k-NN regression on data1D, k=%d" % kc)
         plt.savefig('prediction' + '_%g.png' % kc)
-
-
-
-
-
-
-
-
