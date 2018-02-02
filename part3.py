@@ -78,7 +78,7 @@ if __name__ == '__main__':
     # Load Data
     # task = 0 >> select the name ID targets for face recognition task
     # task = 1 >> select the gender ID targets for gender recognition task
-    task = 1
+    task = 0
     trainData, validData, testData, trainTarget, validTarget, testTarget = data_segmentation("data.npy", "target.npy",task)
     kvec = [1, 5, 10, 25, 50, 100, 200]
 
@@ -119,12 +119,12 @@ if __name__ == '__main__':
         mseResult['test'].append(mse_test)
         print("\nK=%d\t validation MSE: %f, test MSE: %f" % (kc, mse_valid, mse_test))
 
-        # compute correction rate
-        corr_valid = sess.run(accuracy, feed_dict={predY: predictionTargetResult['validation'], newY: validTarget})
-        corr_test = sess.run(accuracy, feed_dict={predY: predictionTargetResult['test'], newY: testTarget})
-        accuracyResult['validation'].append(corr_valid[1])
-        accuracyResult['test'].append(corr_test[1])
-        print("\t validation corr: %f, test corr: %f" % (corr_valid[1], corr_test[1]))
+        # compute accuracy
+        accu_valid = sess.run(accuracy, feed_dict={predY: predictionTargetResult['validation'], newY: validTarget})
+        accu_test = sess.run(accuracy, feed_dict={predY: predictionTargetResult['test'], newY: testTarget})
+        accuracyResult['validation'].append(accu_valid[1])
+        accuracyResult['test'].append(accu_test[1])
+        print("\t validation accu: %f, test accu: %f" % (accu_valid[1], accu_test[1]))
 
 # determine the best K value based on validation set
 k_best = kvec[np.argmin(mseResult['validation'])]
@@ -135,11 +135,11 @@ plt.plot(kvec, mseResult['validation'], label='validation MSE')
 plt.plot(kvec, mseResult['test'], label='test MSE')
 plt.legend()
 plt.title("validation MSE and test MSE against varying k")
-plt.savefig('part3_MSE(%d).png'%task)
+plt.savefig('part3_MSE_task=%d.png'%task)
 
 plt.clf()
 plt.plot(kvec, accuracyResult['validation'], label='validation accuracy')
 plt.plot(kvec, accuracyResult['test'], label='test accuracy')
 plt.legend()
 plt.title("validation accuracy and test accuracy against varying k")
-plt.savefig('part3_accuracy(%d).png'%task)
+plt.savefig('part3_accuracy_task=%d.png'%task)
