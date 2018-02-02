@@ -100,4 +100,4 @@ if __name__ == '__main__':
         plt.plot(trainData, trainTarget, '.')
         plt.plot(X, prediction, '-')
         plt.title("k-NN regression on data1D, k=%d" % kc)
-        plt.savefig('prediction' + '_%g.png' % kc)
+        plt.savefig('part2_prediction_k=' + '%g.png' % kc)
