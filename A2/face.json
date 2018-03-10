@@ -17,5 +17,7 @@
   "max_to_keep": 5,
   "dataset": "FaceScrub",
 
+  "logistic": true,
+
   "validation_interval": 500000
 }
