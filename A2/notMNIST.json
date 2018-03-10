@@ -1,0 +1,23 @@
+{
+    "exp_name": "example",
+    "num_iter": 20000,
+    "batch_size": 500,
+    "num_iter_per_epoch": 7,
+    "num_epochs": 2857,
+    "learning_rate": 0.005,
+    "weight_decay": 0,
+    "input_size": 784,
+    "output_size": 2,
+    "adam": false,
+    
+    "valid_batch_size": 100,
+    "test_batch_size": 145,
+    
+    "max_to_keep": 5,
+    "dataset": "notMNIST",
+    "face_task": 0,
+
+    "logistic": false,
+  
+    "validation_interval": 500000
+  }

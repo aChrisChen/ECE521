@@ -14,10 +14,11 @@ class DataGenerator():
     def get_dataset(self):
         name_dataset = self.config.dataset
         if name_dataset == 'notMNIST':
-            self.trainDataset, self.validDataset, self.testDataset  = self.notMNISTDataset()
+            self.trainDataset, self.validDataset, self.testDataset = self.notMNISTDataset()
+        elif name_dataset == 'FaceScrub':
+            self.trainDataset, self.validDataset, self.testDataset = self.faceDataset(self.config.face_task)
         else:
             print('no dataset')
-
 
 
     def notMNISTDataset(self):
@@ -48,27 +49,61 @@ class DataGenerator():
         return [trainData, trainTarget], [validData, validTarget], [testData, testTarget]
 
 
+    def faceDataset(self, task):
+        Data = np.load("data/data.npy") / 255.
+        Target = np.load("data/target.npy")
+
+        np.random.seed(45689)
+        rnd_idx = np.arange(np.shape(Data)[0])
+        np.random.shuffle(rnd_idx)
+
+        trBatch = int(0.8*len(rnd_idx))
+        validBatch = int(0.1*len(rnd_idx))
+
+        trainData, validData, testData = Data[rnd_idx[1:trBatch],:], \
+        Data[rnd_idx[trBatch+1:trBatch + validBatch],:],\
+        Data[rnd_idx[trBatch + validBatch+1:-1],:]
+
+        trainTarget, validTarget, testTarget = Target[rnd_idx[1:trBatch], task], \
+        Target[rnd_idx[trBatch+1:trBatch + validBatch], task],\
+        Target[rnd_idx[trBatch + validBatch + 1:-1], task]
+
+        trainTarget = trainTarget[:, np.newaxis]
+        validTarget = validTarget[:, np.newaxis]
+        testTarget = testTarget[:, np.newaxis]
+
+        trainTarget = self.oneHotEncoder(trainTarget)
+        validTarget = self.oneHotEncoder(validTarget)
+        testTarget = self.oneHotEncoder(testTarget)
+
+        return [trainData, trainTarget], [validData, validTarget], [testData, testTarget]
+
     def dataloader(self):
+        # self.max_value = tf.placeholder(tf.int64, shape=[])
+
         features, labels = self.trainDataset[0], self.trainDataset[1]
         dataset = tf.data.Dataset.from_tensor_slices((features, labels)).batch(self.config.batch_size)
-        self.train_iter = dataset.make_one_shot_iterator()
+        self.train_iter = dataset.make_initializable_iterator()
 
         features, labels = self.validDataset[0], self.validDataset[1]
-        dataset = tf.data.Dataset.from_tensor_slices((features, labels)).batch(self.config.batch_size)
-        self.valid_iter = dataset.make_one_shot_iterator()
+        dataset = tf.data.Dataset.from_tensor_slices((features, labels)).batch(self.config.valid_batch_size)
+        self.valid_iter = dataset.make_initializable_iterator()
 
         features, labels = self.trainDataset[0], self.trainDataset[1]
-        dataset = tf.data.Dataset.from_tensor_slices((features, labels)).batch(self.config.batch_size)
-        self.test_iter = dataset.make_one_shot_iterator()
+        dataset = tf.data.Dataset.from_tensor_slices((features, labels)).batch(self.config.test_batch_size)
+        self.test_iter = dataset.make_initializable_iterator()
+
 
     def next_batch(self, split):
         if split == 'train':
+            self.sess.run(self.train_iter.initializer)
             return self.sess.run(self.train_iter.get_next())
         if split == 'valid':
+            self.sess.run(self.valid_iter.initializer)
             return self.sess.run(self.valid_iter.get_next())
         else:
+            self.sess.run(self.test_iter.initializer)
             return self.sess.run(self.test_iter.get_next())
-
 
 
     def oneHotEncoder(self, indice):
@@ -76,7 +111,3 @@ class DataGenerator():
         indice_encoded = indice.reshape(len(indice),1)
         onehot_encoded = onehot_encoder.fit_transform(indice_encoded)
         return onehot_encoded
-
-
-
-

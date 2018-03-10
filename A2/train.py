@@ -40,12 +40,10 @@ def train(sess, data, model, config, logger):
             logger.summarize(cur_iter, summarizer="valid", summaries_dict=summary_dict)
 
 
-
-
 def train_step(sess, data, model):
     batch_x, batch_y = data.next_batch('train')
     feed_dict = {model.x: batch_x, model.y: batch_y, model.is_training: True}
-    _, loss, acc = sess.run([model.train_step, model.cross_e, model.accuracy],
+    _, loss, acc = sess.run([model.train_step, model.total_loss, model.accuracy],
                             feed_dict= feed_dict)
     return loss, acc
 
@@ -53,6 +51,6 @@ def train_step(sess, data, model):
 def evaluate(sess, data, model, split):
     batch_x, batch_y = data.next_batch(split)
     feed_dict = {model.x: batch_x, model.y: batch_y, model.is_training: False}
-    loss, acc = sess.run([model.cross_e, model.accuracy],
+    loss, acc = sess.run([model.total_loss, model.accuracy],
                             feed_dict=feed_dict)
     return loss, acc

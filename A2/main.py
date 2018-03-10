@@ -14,14 +14,17 @@ def main():
     except:
         print("missing or invalid arguments")
         exit(0)
-
+    
     # create the experiments dirs
     create_dirs([config.summary_dir, config.checkpoint_dir])
 
     sess = tf.Session()
     training_data = DataGenerator(sess, config)
     print(training_data)
-    model = LogisticClassification(config)
+    if config.logistic:
+        model = LogisticClassification(config)
+    else:
+        model = LinearRegression(config)
     logger = Logger(sess, config)
 
     train(sess, training_data, model, config, logger)

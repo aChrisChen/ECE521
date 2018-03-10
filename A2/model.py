@@ -2,13 +2,11 @@ import tensorflow as tf
 import os
 import math
 
-
 class BaseModel(object):
     def __init__(self, config):
         self.config = config
         self.init_global_step()
         self.init_cur_epoch()
-
 
     def save(self, sess):
         print("Saving model...")
@@ -26,7 +24,6 @@ class BaseModel(object):
             self.cur_epoch_tensor = tf.Variable(0, trainable=False, name = 'cur_epoch')
             self.increment_cur_epoch_tensor = tf.assign(self.cur_epoch_tensor, self.cur_epoch_tensor + 1)
 
-
     def init_global_step(self):
         with tf.variable_scope('global_step'):
             self.global_step_tensor = tf.Variable(0, trainable=False, name = 'global_step')
@@ -39,8 +36,6 @@ class BaseModel(object):
 
     def loss(self):
         raise NotImplementedError
-
-
 
 
 class LogisticClassification(BaseModel):
@@ -56,33 +51,77 @@ class LogisticClassification(BaseModel):
         self.loss()
         self.init_saver()
 
-
     def build_model(self):
-
-
         self.is_training = tf.placeholder(tf.bool)
-        self.x = tf.placeholder(tf.float32, shape=( self.BATCH_SIZE, self.IMAGE_SIZE, self.IMAGE_SIZE))
-        self.y = tf.placeholder(tf.float32, shape = ( self.BATCH_SIZE, self.output_size))
+        # error when this x placeholder used for evaluation, if the number of data points in validation set is less than self.BATCH_SIZE
+        self.x = tf.placeholder(tf.float32, shape=(self.BATCH_SIZE, self.IMAGE_SIZE, self.IMAGE_SIZE))
+        self.y = tf.placeholder(tf.float32, shape=(self.BATCH_SIZE, self.output_size))
 
         self.input = tf.reshape(self.x, [-1, self.IMAGE_SIZE * self.IMAGE_SIZE])
-        self.output = tf.layers.dense(inputs= self.input, units= self.config.output_size,  name='dense1')
+        self.output = tf.layers.dense(inputs=self.input, units=self.config.output_size, name='dense1')
 
     def loss(self):
         # loss
-        self.cross_e = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=self.y, logits = self.output))
+        if self.config.output_size == 2:
+            self.cross_e = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=self.y, logits=self.output))
+        else:
+            self.cross_e = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=self.y, logits=self.output))
+        
+        self.weights = tf.get_default_graph().get_tensor_by_name(os.path.split(self.output.name)[0] + '/kernel:0')
+        self.weight_decay_loss = tf.reduce_sum(self.weights * self.weights) * 0.5 * self.config.weight_decay
+        
+        self.total_loss = self.cross_e + self.weight_decay_loss
         # accuracy
         self.prediction = tf.argmax(self.output,1)
         self.accuracy = tf.reduce_mean(tf.cast(tf.equal(self.prediction, tf.argmax(self.y,1)), tf.float32))
 
         # update parameters
-        self.train_step = tf.train.AdamOptimizer(self.config.learning_rate).minimize(self.cross_e, global_step= self.global_step_tensor)
+        if self.config.adam:
+            self.train_step = tf.train.AdamOptimizer(self.config.learning_rate).minimize(self.total_loss, global_step= self.global_step_tensor)
+        else:
+            self.train_step = tf.train.GradientDescentOptimizer(self.config.learning_rate).minimize(self.total_loss, global_step= self.global_step_tensor)
 
     def init_saver(self):
-        self.saver = tf.train.Saver(max_to_keep= self.config.max_to_keep)
+        self.saver = tf.train.Saver(max_to_keep=self.config.max_to_keep)
 
+class LinearRegression(BaseModel):
+    def __init__(self, config):
+        super(LinearRegression, self).__init__(config)
 
+        self.BATCH_SIZE = self.config.batch_size
+        self.input_size = self.config.input_size
+        self.IMAGE_SIZE = int(math.sqrt(self.input_size))
+        self.output_size = self.config.output_size
 
+        self.build_model()
+        self.loss()
+        self.init_saver()
 
+    def build_model(self):
+        self.is_training = tf.placeholder(tf.bool)
+        self.x = tf.placeholder(tf.float32, shape=(self.BATCH_SIZE, self.IMAGE_SIZE, self.IMAGE_SIZE))
+        self.y = tf.placeholder(tf.float32, shape=(self.BATCH_SIZE, self.output_size))
 
+        self.input = tf.reshape(self.x, [-1, self.IMAGE_SIZE * self.IMAGE_SIZE])
+        self.output = tf.layers.dense(inputs=self.input, units=self.config.output_size, name='dense1')
 
+    def loss(self):
+        # loss
+        self.mse = tf.reduce_mean(tf.reduce_sum(tf.square(self.y - self.output),reduction_indices=1)) * 0.5
+        
+        self.weights = tf.get_default_graph().get_tensor_by_name(os.path.split(self.output.name)[0] + '/kernel:0')
+        self.weight_decay_loss = tf.reduce_sum(self.weights * self.weights) * 0.5 * self.config.weight_decay
+        
+        self.total_loss = self.mse + self.weight_decay_loss
+        # accuracy
+        self.prediction = tf.argmax(self.output,1)
+        self.accuracy = tf.reduce_mean(tf.cast(tf.equal(self.prediction, tf.argmax(self.y,1)), tf.float32))
 
+        # update parameters
+        if self.config.adam:
+            self.train_step = tf.train.AdamOptimizer(self.config.learning_rate).minimize(self.total_loss, global_step= self.global_step_tensor)
+        else:
+            self.train_step = tf.train.GradientDescentOptimizer(self.config.learning_rate).minimize(self.total_loss, global_step= self.global_step_tensor)
+
+    def init_saver(self):
+        self.saver = tf.train.Saver(max_to_keep=self.config.max_to_keep)
