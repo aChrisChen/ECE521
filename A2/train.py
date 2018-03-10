@@ -50,6 +50,7 @@ def train_step(sess, data, model):
 
 def evaluate(sess, data, model, split):
     batch_x, batch_y = data.next_batch(split)
+    # TODO: train, valid, test share the same placeholder for model.x -> check TODO in model.py
     feed_dict = {model.x: batch_x, model.y: batch_y, model.is_training: False}
     loss, acc = sess.run([model.total_loss, model.accuracy],
                             feed_dict=feed_dict)
