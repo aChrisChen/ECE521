@@ -53,9 +53,8 @@ class LogisticClassification(BaseModel):
 
     def build_model(self):
         self.is_training = tf.placeholder(tf.bool)
-        # TODO: error when this x placeholder used for evaluation, if the number of data points in validation set is less than self.BATCH_SIZE
-        self.x = tf.placeholder(tf.float32, shape=(self.BATCH_SIZE, self.IMAGE_SIZE, self.IMAGE_SIZE))
-        self.y = tf.placeholder(tf.float32, shape=(self.BATCH_SIZE, self.output_size))
+        self.x = tf.placeholder(tf.float32, shape=(None, self.IMAGE_SIZE, self.IMAGE_SIZE))
+        self.y = tf.placeholder(tf.float32, shape=(None, self.output_size))
 
         self.input = tf.reshape(self.x, [-1, self.IMAGE_SIZE * self.IMAGE_SIZE])
         # TODO: why cannot set activation=tf.nn.sigmoid?
