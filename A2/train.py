@@ -16,13 +16,17 @@ def train(sess, data, model, config, logger):
         loss_list = []
         acc_list = []
         for iter in tqdm(range(config.num_iter_per_epoch)):
+            cur_iter = model.global_step_tensor.eval(sess) + 1
+            if cur_iter > config.num_iter:
+                break
             loss, acc = train_step(sess, data, model)
             loss_list.append(loss)
             acc_list.append(acc)
+        if cur_iter > config.num_iter:
+            break
         training_loss = np.mean(loss_list)
         training_acc = np.mean(acc_list)
         # Print result + summary
-        cur_iter = model.global_step_tensor.eval(sess)
         print("Iter: %i , Training Loss: %f, Training Accuracy: %f" % ( cur_iter, training_loss, training_acc))
         summary_dict = {}
         summary_dict['loss'] = training_loss
