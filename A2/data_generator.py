@@ -13,15 +13,17 @@ class DataGenerator():
 
     def get_dataset(self):
         name_dataset = self.config.dataset
-        if name_dataset == 'notMNIST':
-            self.trainDataset, self.validDataset, self.testDataset = self.notMNISTDataset()
+        if name_dataset == 'notMNIST_2':
+            self.trainDataset, self.validDataset, self.testDataset = self.notMNISTDataset2()
+        elif name_dataset == "notMNIST_10":
+            self.trainDataset, self.validDataset, self.testDataset = self.notMNISTDataset10()
         elif name_dataset == 'FaceScrub':
             self.trainDataset, self.validDataset, self.testDataset = self.faceDataset(self.config.face_task)
         else:
             print('no dataset')
 
 
-    def notMNISTDataset(self):
+    def notMNISTDataset2(self):
         with np.load("data/notMNIST.npz") as data:
             Data, Target = data["images"], data["labels"]
         posClass = 2
@@ -48,6 +50,23 @@ class DataGenerator():
 
         return [trainData, trainTarget], [validData, validTarget], [testData, testTarget]
 
+    def notMNISTDataset10(self):
+        with np.load("data/notMNIST.npz") as data:
+            Data, Target = data ["images"], data["labels"]
+        np.random.seed(521)
+        randIndx = np.arange(len(Data))
+        np.random.shuffle(randIndx)
+        Data = Data[randIndx]/255.
+        Target = Target[randIndx]
+        trainData, trainTarget = Data[:15000], Target[:15000]
+        validData, validTarget = Data[15000:16000], Target[15000:16000]
+        testData, testTarget = Data[16000:], Target[16000:]
+
+        trainTarget = self.oneHotEncoder(trainTarget)
+        validTarget = self.oneHotEncoder(validTarget)
+        testTarget = self.oneHotEncoder(testTarget)
+
+        return [trainData, trainTarget], [validData, validTarget], [testData, testTarget]
 
     def faceDataset(self, task):
         Data = np.load("data/data.npy") / 255.
