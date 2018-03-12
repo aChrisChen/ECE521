@@ -94,16 +94,16 @@ class DataGenerator():
         self.test_iter = dataset.make_initializable_iterator()
 
 
-    def next_batch(self, split):
+    def next_batch(self, split, next):
         if split == 'train':
             self.sess.run(self.train_iter.initializer)
-            return self.sess.run(self.train_iter.get_next())
+            return self.sess.run(next)
         if split == 'valid':
             self.sess.run(self.valid_iter.initializer)
-            return self.sess.run(self.valid_iter.get_next())
+            return self.sess.run(next)
         else:
             self.sess.run(self.test_iter.initializer)
-            return self.sess.run(self.test_iter.get_next())
+            return self.sess.run(next)
 
 
     def oneHotEncoder(self, indice):
