@@ -99,8 +99,8 @@ class LinearRegression(BaseModel):
 
     def build_model(self):
         self.is_training = tf.placeholder(tf.bool)
-        self.x = tf.placeholder(tf.float32, shape=(self.BATCH_SIZE, self.IMAGE_SIZE, self.IMAGE_SIZE))
-        self.y = tf.placeholder(tf.float32, shape=(self.BATCH_SIZE, self.output_size))
+        self.x = tf.placeholder(tf.float32, shape=(None, self.IMAGE_SIZE, self.IMAGE_SIZE))
+        self.y = tf.placeholder(tf.float32, shape=(None, self.output_size))
 
         self.input = tf.reshape(self.x, [-1, self.IMAGE_SIZE * self.IMAGE_SIZE])
         self.output = tf.layers.dense(inputs=self.input, units=self.config.output_size, name='dense1')
@@ -116,8 +116,8 @@ class LinearRegression(BaseModel):
         
         # accuracy
         # this prediction value is for classification job
-        self.prediction = tf.round(self.output)
-        self.accuracy = tf.reduce_mean(tf.cast(tf.equal(self.prediction, self.y), tf.float32))
+        self.prediction = tf.round(tf.argmax(self.output,1))
+        self.accuracy = tf.reduce_mean(tf.cast(tf.equal(self.prediction, tf.argmax(self.y,1)), tf.float32))
 
         # update parameters
         if self.config.adam:
