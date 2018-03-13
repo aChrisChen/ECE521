@@ -16,7 +16,7 @@ def main():
         exit(0)
     
     # create the experiments dirs
-    create_dirs([config.summary_dir, config.checkpoint_dir])
+    create_dirs([config.summary_dir, config.checkpoint_dir, config.plot_dir])
 
     sess = tf.Session()
     training_data = DataGenerator(sess, config)
