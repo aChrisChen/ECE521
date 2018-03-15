@@ -11,6 +11,10 @@ def train(sess, data, model, config, logger):
     # to record loss of all iterations in one npz
     global_train_loss_list = []
     global_valid_loss_list = []
+    global_test_loss_list = []
+    global_train_acc_list = []
+    global_valid_acc_list = []
+    global_test_acc_list = []
 
     # to solve memory leak caused by iterator.get_next(), put get_next() out of the loop
     train_next_element = data.train_iter.get_next()
@@ -28,10 +32,11 @@ def train(sess, data, model, config, logger):
             cur_iter = model.global_step_tensor.eval(sess) + 1
             if cur_iter > config.num_iter:
                 break
-            loss, acc = train_step(sess, data, model, train_next_element)
+            loss, acc= train_step(sess, data, model, config)
             loss_list.append(loss)
             acc_list.append(acc)
-            global_train_loss_list.append(loss)
+        global_train_loss_list.append(loss)
+        global_train_acc_list.append(acc)
         if cur_iter > config.num_iter:
             break
         training_loss = np.mean(loss_list)
@@ -45,28 +50,50 @@ def train(sess, data, model, config, logger):
 
         ###### Validation ####
         if cur_iter % config.validation_interval == 0:
-            valid_loss, valid_acc = evaluate(sess, data, model, 'valid', valid_next_element)
+            valid_loss, valid_acc = evaluate(sess, data, model, 'valid', config)
             global_valid_loss_list.append(valid_loss)
-            print("Validation Loss: %f, Validation Accuracy: %f" % (valid_loss, valid_acc ))
+            global_valid_acc_list.append(valid_acc)
+            print("Validation Loss: %f, Validation Accuracy: %f" % (valid_loss, valid_acc))
             summary_dict = {}
             summary_dict['loss'] = valid_loss
             summary_dict['acc'] = valid_acc
             logger.summarize(cur_iter, summarizer="valid", summaries_dict=summary_dict)
 
-    np.savez("loss.npz", train=global_train_loss_list, valid=global_valid_loss_list)
+    ##### Test ####
+    test_loss, test_acc = evaluate(sess, data, model, 'test', config)
+    global_test_loss_list.append(test_loss)
+    global_test_acc_list.append(test_acc)
 
+    np.savez(os.path.join("npz",config.dataset,("%d_%f_%f_%s_%s.npz")%(config.num_iter, config.learning_rate, config.weight_decay, config.logistic, config.adam)), \
+             train_loss=global_train_loss_list, \
+             valid_loss=global_valid_loss_list, \
+             test_loss=global_test_loss_list, \
+             train_acc=global_train_acc_list, \
+             valid_acc=global_valid_acc_list, \
+             test_acc=global_test_acc_list)
+             
 
-def train_step(sess, data, model, next):
-    batch_x, batch_y = data.next_batch('train', next)
+def train_step(sess, data, model, config):
+    batch_x, batch_y = data.next_batch('train')
     feed_dict = {model.x: batch_x, model.y: batch_y, model.is_training: True}
-    _, loss, acc = sess.run([model.train_step, model.total_loss, model.accuracy],
+    if config.logistic:
+        _, loss, acc = sess.run([model.train_step, model.total_loss, model.accuracy],
                             feed_dict=feed_dict)
+    else:
+        _, loss, target, output = sess.run([model.train_step, model.total_loss, model.y, model.output],
+                            feed_dict=feed_dict)
+        acc = np.mean((output > 0.5) == target)
     return loss, acc
 
 
-def evaluate(sess, data, model, split, next):
-    batch_x, batch_y = data.next_batch(split, next)
+def evaluate(sess, data, model, split, config):
+    batch_x, batch_y = data.next_batch(split)
     feed_dict = {model.x: batch_x, model.y: batch_y, model.is_training: False}
-    loss, acc = sess.run([model.total_loss, model.accuracy],
+    if config.logistic:
+        loss, acc = sess.run([model.total_loss, model.accuracy],
                             feed_dict=feed_dict)
+    else:
+        loss, target, output = sess.run([model.total_loss, model.y, model.output],
+                            feed_dict=feed_dict)
+        acc = np.mean((output > 0.5) == target)
     return loss, acc

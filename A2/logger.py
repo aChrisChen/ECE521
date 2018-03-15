@@ -57,8 +57,9 @@ class Logger():
     x_label: string
     y_label: string
     title: string
+    show: boolean, whether to show before saving
     '''
-    def plot_npz(self, fig_name, dict1, tag1, tag1_label, dict2=None, tag2=None, tag2_label=None, x_scale=1, new_plot=True, log_x=False, x_label=None, y_label=None, title=None):
+    def plot_npz(self, fig_name, dict1, tag1, tag1_label, dict2=None, tag2=None, tag2_label=None, x_scale=1, new_plot=True, log_x=False, x_label=None, y_label=None, title=None, show=False):
         r1 = np.load(dict1)
         y1 = r1[tag1]
         x1 = np.arange(np.shape(y1)[0]) * x_scale + 1
@@ -83,5 +84,7 @@ class Logger():
         plt.xlabel(x_label)
         plt.ylabel(y_label)
 
+        if show:
+            plt.show()
         time = datetime.datetime.now().strftime("%y-%m-%d_%H-%M")
         plt.savefig(os.path.join(self.config.plot_dir, time+"_"+fig_name+".png"))

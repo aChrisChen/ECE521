@@ -21,12 +21,12 @@ class BaseModel(object):
 
     def init_cur_epoch(self):
         with tf.variable_scope('cur_epoch'):
-            self.cur_epoch_tensor = tf.Variable(0, trainable=False, name = 'cur_epoch')
+            self.cur_epoch_tensor = tf.Variable(0., trainable=False, name = 'cur_epoch')
             self.increment_cur_epoch_tensor = tf.assign(self.cur_epoch_tensor, self.cur_epoch_tensor + 1)
 
     def init_global_step(self):
         with tf.variable_scope('global_step'):
-            self.global_step_tensor = tf.Variable(0, trainable=False, name = 'global_step')
+            self.global_step_tensor = tf.Variable(0., trainable=False, name = 'global_step')
 
     def init_saver(self):
         raise NotImplementedError
@@ -46,6 +46,7 @@ class LogisticClassification(BaseModel):
         self.input_size = self.config.input_size
         self.IMAGE_SIZE = int(math.sqrt(self.input_size))
         self.output_size = self.config.output_size
+        self.weight_decay = float(self.config.weight_decay)
 
         self.build_model()
         self.loss()
@@ -57,8 +58,12 @@ class LogisticClassification(BaseModel):
         self.y = tf.placeholder(tf.float32, shape=(None, self.output_size))
 
         self.input = tf.reshape(self.x, [-1, self.IMAGE_SIZE * self.IMAGE_SIZE])
-        # TODO: why cannot set activation=tf.nn.sigmoid?
-        self.output = tf.layers.dense(inputs=self.input, units=self.config.output_size, name='dense1')
+
+        self.output = tf.layers.dense(inputs=self.input, \
+                                      units=self.config.output_size, \
+                                      activation=tf.nn.sigmoid, \
+                                      kernel_regularizer=tf.contrib.layers.l2_regularizer(self.weight_decay), \
+                                      name='dense1')
 
     def loss(self):
         # loss
@@ -67,8 +72,7 @@ class LogisticClassification(BaseModel):
         else:
             self.cross_e = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=self.y, logits=self.output))
         
-        self.weights = tf.get_default_graph().get_tensor_by_name(os.path.split(self.output.name)[0] + '/kernel:0')
-        self.weight_decay_loss = tf.nn.l2_loss(self.weights) * self.config.weight_decay
+        self.weight_decay_loss = tf.losses.get_regularization_loss()
         
         self.total_loss = self.cross_e + self.weight_decay_loss
         # accuracy
@@ -77,12 +81,13 @@ class LogisticClassification(BaseModel):
 
         # update parameters
         if self.config.adam:
-            self.train_step = tf.train.AdamOptimizer(self.config.learning_rate).minimize(self.total_loss, global_step= self.global_step_tensor)
+            self.train_step = tf.train.AdamOptimizer(self.config.learning_rate).minimize(self.total_loss, global_step=self.global_step_tensor)
         else:
-            self.train_step = tf.train.GradientDescentOptimizer(self.config.learning_rate).minimize(self.total_loss, global_step= self.global_step_tensor)
+            self.train_step = tf.train.GradientDescentOptimizer(self.config.learning_rate).minimize(self.total_loss, global_step=self.global_step_tensor)
 
     def init_saver(self):
         self.saver = tf.train.Saver(max_to_keep=self.config.max_to_keep)
+
 
 class LinearRegression(BaseModel):
     def __init__(self, config):
@@ -92,6 +97,7 @@ class LinearRegression(BaseModel):
         self.input_size = self.config.input_size
         self.IMAGE_SIZE = int(math.sqrt(self.input_size))
         self.output_size = self.config.output_size
+        self.weight_decay = float(self.config.weight_decay)
 
         self.build_model()
         self.loss()
@@ -100,30 +106,43 @@ class LinearRegression(BaseModel):
     def build_model(self):
         self.is_training = tf.placeholder(tf.bool)
         self.x = tf.placeholder(tf.float32, shape=(None, self.IMAGE_SIZE, self.IMAGE_SIZE))
-        self.y = tf.placeholder(tf.float32, shape=(None, self.output_size))
+        self.y = tf.placeholder(tf.float32, shape=(None, 1))
 
         self.input = tf.reshape(self.x, [-1, self.IMAGE_SIZE * self.IMAGE_SIZE])
-        self.output = tf.layers.dense(inputs=self.input, units=self.config.output_size, name='dense1')
+        self.w = tf.Variable(tf.truncated_normal(shape=[784, 1], stddev=0.5))
+        self.b = tf.Variable(0.0)
+
+        self.output = tf.matmul(self.input, self.w) + self.b
+
+        # self.output = tf.layers.dense(inputs=self.input, \
+        #                               units=self.config.output_size, \
+        #                               activation=None, \
+        #                               kernel_regularizer=tf.contrib.layers.l2_regularizer(self.weight_decay), \
+        #                               name='dense1')
 
     def loss(self):
         # loss
-        self.mse = tf.reduce_mean(tf.reduce_sum(tf.square(self.y - self.output),reduction_indices=1)) * 0.5
+        self.mse = tf.reduce_mean(tf.reduce_sum(tf.square(self.output - self.y), reduction_indices=1)) * 0.5
+
+        self.weight_decay_loss = tf.reduce_sum(tf.square(self.w)) * self.weight_decay * 0.5
+        # self.mse = tf.reduce_mean(tf.reduce_sum(tf.square(self.y - self.output),reduction_indices=1)) * 0.5
+        # self.mse = tf.losses.mean_squared_error(labels=self.y, predictions=self.output, weights=0.5)
         
-        self.weights = tf.get_default_graph().get_tensor_by_name(os.path.split(self.output.name)[0] + '/kernel:0')
-        self.weight_decay_loss = tf.nn.l2_loss(self.weights) * self.config.weight_decay
+        # self.weight_decay_loss = tf.losses.get_regularization_loss()
         
         self.total_loss = self.mse + self.weight_decay_loss
         
         # accuracy
+        # self.accuracy = 1 - tf.reduce_mean(tf.abs(tf.sign(self.output - 0.5) - self.y))
         # this prediction value is for classification job
-        self.prediction = tf.round(tf.argmax(self.output,1))
-        self.accuracy = tf.reduce_mean(tf.cast(tf.equal(self.prediction, tf.argmax(self.y,1)), tf.float32))
+        # self.prediction = tf.argmax(self.output,1)
+        # self.accuracy = tf.reduce_mean(tf.cast(tf.equal(self.prediction, tf.argmax(self.y,1)), tf.float32))
 
         # update parameters
         if self.config.adam:
-            self.train_step = tf.train.AdamOptimizer(self.config.learning_rate).minimize(self.total_loss, global_step = self.global_step_tensor)
+            self.train_step = tf.train.AdamOptimizer(self.config.learning_rate).minimize(self.total_loss, global_step=self.global_step_tensor)
         else:
-            self.train_step = tf.train.GradientDescentOptimizer(self.config.learning_rate).minimize(self.total_loss, global_step = self.global_step_tensor)
+            self.train_step = tf.train.GradientDescentOptimizer(self.config.learning_rate).minimize(self.total_loss, global_step=self.global_step_tensor)
 
     def init_saver(self):
         self.saver = tf.train.Saver(max_to_keep=self.config.max_to_keep)
