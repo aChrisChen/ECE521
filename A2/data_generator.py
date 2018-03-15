@@ -40,15 +40,16 @@ class DataGenerator():
         Data, Target = Data[randIndx], Target[randIndx]
 
         trainData, trainTarget = Data[:3500], Target[:3500]
-        trainTarget = self.oneHotEncoder(trainTarget)
-
         validData, validTarget = Data[3500:3600], Target[3500:3600]
-        validTarget = self.oneHotEncoder(validTarget)
-
         testData, testTarget = Data[3600:], Target[3600:]
-        testTarget = self.oneHotEncoder(testTarget)
+
+        if self.config.one_hot:
+            trainTarget = self.oneHotEncoder(trainTarget)
+            validTarget = self.oneHotEncoder(validTarget)
+            testTarget = self.oneHotEncoder(testTarget)
 
         return [trainData, trainTarget], [validData, validTarget], [testData, testTarget]
+
 
     def notMNISTDataset10(self):
         with np.load("data/notMNIST.npz") as data:
@@ -62,11 +63,13 @@ class DataGenerator():
         validData, validTarget = Data[15000:16000], Target[15000:16000]
         testData, testTarget = Data[16000:], Target[16000:]
 
-        trainTarget = self.oneHotEncoder(trainTarget)
-        validTarget = self.oneHotEncoder(validTarget)
-        testTarget = self.oneHotEncoder(testTarget)
+        if self.config.one_hot:
+            trainTarget = self.oneHotEncoder(trainTarget)
+            validTarget = self.oneHotEncoder(validTarget)
+            testTarget = self.oneHotEncoder(testTarget)
 
         return [trainData, trainTarget], [validData, validTarget], [testData, testTarget]
+
 
     def faceDataset(self, task):
         Data = np.load("data/data.npy") / 255.
@@ -91,38 +94,53 @@ class DataGenerator():
         validTarget = validTarget[:, np.newaxis]
         testTarget = testTarget[:, np.newaxis]
 
-        trainTarget = self.oneHotEncoder(trainTarget)
-        validTarget = self.oneHotEncoder(validTarget)
-        testTarget = self.oneHotEncoder(testTarget)
+        if self.config.one_hot:
+            trainTarget = self.oneHotEncoder(trainTarget)
+            validTarget = self.oneHotEncoder(validTarget)
+            testTarget = self.oneHotEncoder(testTarget)
 
         return [trainData, trainTarget], [validData, validTarget], [testData, testTarget]
 
+
     def dataloader(self):
-        # self.max_value = tf.placeholder(tf.int64, shape=[])
+        self.max_value = tf.placeholder(tf.int64, shape=[])
 
         features, labels = self.trainDataset[0], self.trainDataset[1]
         dataset = tf.data.Dataset.from_tensor_slices((features, labels)).batch(self.config.batch_size)
         self.train_iter = dataset.make_initializable_iterator()
+        self.train_next_element = self.train_iter.get_next()
+        self.sess.run(self.train_iter.initializer, feed_dict={self.max_value: self.config.batch_size})
 
         features, labels = self.validDataset[0], self.validDataset[1]
         dataset = tf.data.Dataset.from_tensor_slices((features, labels)).batch(self.config.valid_batch_size)
         self.valid_iter = dataset.make_initializable_iterator()
+        self.valid_next_element = self.valid_iter.get_next()
+        self.sess.run(self.valid_iter.initializer, feed_dict={self.max_value: self.config.valid_batch_size})
 
         features, labels = self.trainDataset[0], self.trainDataset[1]
         dataset = tf.data.Dataset.from_tensor_slices((features, labels)).batch(self.config.test_batch_size)
         self.test_iter = dataset.make_initializable_iterator()
+        self.test_next_element = self.test_iter.get_next()
+        self.sess.run(self.test_iter.initializer, feed_dict={self.max_value: self.config.test_batch_size})
 
 
-    def next_batch(self, split, next):
+    def next_batch(self, split):
         if split == 'train':
-            self.sess.run(self.train_iter.initializer)
-            return self.sess.run(next)
+            try:
+                self.next = self.sess.run(self.train_next_element)
+            except tf.errors.OutOfRangeError:
+                self.sess.run(self.train_iter.initializer, feed_dict={self.max_value: self.config.batch_size})
+                self.next = self.sess.run(self.train_next_element)
+            return self.next
         if split == 'valid':
-            self.sess.run(self.valid_iter.initializer)
-            return self.sess.run(next)
+            try:
+                self.next = self.sess.run(self.valid_next_element)
+            except tf.errors.OutOfRangeError:
+                self.sess.run(self.valid_iter.initializer, feed_dict={self.max_value: self.config.valid_batch_size})
+                self.next = self.sess.run(self.valid_next_element)
+            return self.next
         else:
-            self.sess.run(self.test_iter.initializer)
-            return self.sess.run(next)
+            return self.sess.run(self.test_next_element)
 
 
     def oneHotEncoder(self, indice):
