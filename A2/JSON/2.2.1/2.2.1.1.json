@@ -1,0 +1,26 @@
+{
+    "exp_name": "2.2.1.1",
+    "num_iter": 20000,
+    "batch_size": 500,
+    "num_iter_per_epoch": 30,
+    "num_epochs": 667,
+    "learning_rate": 0.005,
+    "weight_decay": 0.01,
+    "input_size": 784,
+    "one_hot": true,
+    "output_size": 10,
+    "adam": true,
+
+    "valid_batch_size": 1000,
+    "test_batch_size": 2724,
+
+    "max_to_keep": 5,
+    "dataset": "notMNIST_10",
+    "face_task": 0,
+
+    "logistic": true,
+
+    "validation_interval": 30,
+
+    "gpu": false
+  }

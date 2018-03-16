@@ -1,0 +1,26 @@
+{
+  "exp_name": "2.2.3.1",
+  "num_iter": 20000,
+  "batch_size": 300,
+  "num_iter_per_epoch": 3,
+  "num_epochs": 6667,
+  "learning_rate": 0.005,
+  "weight_decay": 0,
+  "input_size": 1024,
+  "one_hot": true,
+  "output_size": 6,
+  "adam": true,
+
+  "valid_batch_size": 92,
+  "test_batch_size": 93,
+
+  "max_to_keep": 5,
+  "dataset": "FaceScrub",
+  "face_task": 0,
+
+  "logistic": true,
+
+  "validation_interval": 3,
+
+  "gpu": false
+}
