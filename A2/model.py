@@ -61,7 +61,6 @@ class LogisticClassification(BaseModel):
 
         self.output = tf.layers.dense(inputs=self.input, \
                                       units=self.config.output_size, \
-                                      activation=tf.nn.sigmoid, \
                                       kernel_regularizer=tf.contrib.layers.l2_regularizer(self.weight_decay), \
                                       name='dense1')
 
@@ -71,9 +70,9 @@ class LogisticClassification(BaseModel):
             self.cross_e = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=self.y, logits=self.output))
         else:
             self.cross_e = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=self.y, logits=self.output))
-        
+
         self.weight_decay_loss = tf.losses.get_regularization_loss()
-        
+
         self.total_loss = self.cross_e + self.weight_decay_loss
         # accuracy
         self.prediction = tf.argmax(self.output,1)
@@ -109,34 +108,18 @@ class LinearRegression(BaseModel):
         self.y = tf.placeholder(tf.float32, shape=(None, 1))
 
         self.input = tf.reshape(self.x, [-1, self.IMAGE_SIZE * self.IMAGE_SIZE])
-        self.w = tf.Variable(tf.truncated_normal(shape=[784, 1], stddev=0.5))
+        self.w = tf.Variable(tf.truncated_normal(shape=[self.IMAGE_SIZE * self.IMAGE_SIZE, 1], stddev=0.5))
         self.b = tf.Variable(0.0)
 
         self.output = tf.matmul(self.input, self.w) + self.b
-
-        # self.output = tf.layers.dense(inputs=self.input, \
-        #                               units=self.config.output_size, \
-        #                               activation=None, \
-        #                               kernel_regularizer=tf.contrib.layers.l2_regularizer(self.weight_decay), \
-        #                               name='dense1')
 
     def loss(self):
         # loss
         self.mse = tf.reduce_mean(tf.reduce_sum(tf.square(self.output - self.y), reduction_indices=1)) * 0.5
 
         self.weight_decay_loss = tf.reduce_sum(tf.square(self.w)) * self.weight_decay * 0.5
-        # self.mse = tf.reduce_mean(tf.reduce_sum(tf.square(self.y - self.output),reduction_indices=1)) * 0.5
-        # self.mse = tf.losses.mean_squared_error(labels=self.y, predictions=self.output, weights=0.5)
-        
-        # self.weight_decay_loss = tf.losses.get_regularization_loss()
-        
+
         self.total_loss = self.mse + self.weight_decay_loss
-        
-        # accuracy
-        # self.accuracy = 1 - tf.reduce_mean(tf.abs(tf.sign(self.output - 0.5) - self.y))
-        # this prediction value is for classification job
-        # self.prediction = tf.argmax(self.output,1)
-        # self.accuracy = tf.reduce_mean(tf.cast(tf.equal(self.prediction, tf.argmax(self.y,1)), tf.float32))
 
         # update parameters
         if self.config.adam:

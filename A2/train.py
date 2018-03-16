@@ -16,11 +16,6 @@ def train(sess, data, model, config, logger):
     global_valid_acc_list = []
     global_test_acc_list = []
 
-    # to solve memory leak caused by iterator.get_next(), put get_next() out of the loop
-    train_next_element = data.train_iter.get_next()
-    valid_next_element = data.valid_iter.get_next()
-    test_next_element = data.test_iter.get_next()
-
     # train for each epoch
     for cur_epoch in range(model.cur_epoch_tensor.eval(sess), config.num_epochs + 1, 1):
 
@@ -48,7 +43,7 @@ def train(sess, data, model, config, logger):
         summary_dict['acc'] = training_acc
         logger.summarize(cur_iter, summarizer= "train", summaries_dict= summary_dict)
 
-        ###### Validation ####
+        #### Validation ####
         if cur_iter % config.validation_interval == 0:
             valid_loss, valid_acc = evaluate(sess, data, model, 'valid', config)
             global_valid_loss_list.append(valid_loss)
@@ -59,19 +54,19 @@ def train(sess, data, model, config, logger):
             summary_dict['acc'] = valid_acc
             logger.summarize(cur_iter, summarizer="valid", summaries_dict=summary_dict)
 
-    ##### Test ####
+    #### Test after training ####
     test_loss, test_acc = evaluate(sess, data, model, 'test', config)
     global_test_loss_list.append(test_loss)
     global_test_acc_list.append(test_acc)
 
-    np.savez(os.path.join("npz",config.dataset,("%d_%f_%f_%s_%s.npz")%(config.num_iter, config.learning_rate, config.weight_decay, config.logistic, config.adam)), \
+    np.savez(os.path.join("npz",config.dataset,("%d_%f_%f_%s_%s_%s.npz")%(config.num_iter, config.learning_rate, config.weight_decay, config.logistic, config.adam, config.exp_name)), \
              train_loss=global_train_loss_list, \
              valid_loss=global_valid_loss_list, \
              test_loss=global_test_loss_list, \
              train_acc=global_train_acc_list, \
              valid_acc=global_valid_acc_list, \
              test_acc=global_test_acc_list)
-             
+
 
 def train_step(sess, data, model, config):
     batch_x, batch_y = data.next_batch('train')
