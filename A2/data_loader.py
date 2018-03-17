@@ -44,7 +44,7 @@ class DataLoader():
         testData, testTarget = Data[3600:], Target[3600:]
 
         # one hot switch
-        if self.config.one_hot:
+        if not self.config.logistic:
             trainTarget = self.oneHotEncoder(trainTarget)
             validTarget = self.oneHotEncoder(validTarget)
             testTarget = self.oneHotEncoder(testTarget)
@@ -72,7 +72,7 @@ class DataLoader():
         testData, testTarget = Data[16000:], Target[16000:]
 
         # one hot switch
-        if self.config.one_hot:
+        if not self.config.logistic:
             trainTarget = self.oneHotEncoder(trainTarget)
             validTarget = self.oneHotEncoder(validTarget)
             testTarget = self.oneHotEncoder(testTarget)
@@ -111,7 +111,7 @@ class DataLoader():
         testTarget = testTarget[:, np.newaxis]
 
         # one hot switch
-        if self.config.one_hot:
+        if not self.config.logistic:
             trainTarget = self.oneHotEncoder(trainTarget)
             validTarget = self.oneHotEncoder(validTarget)
             testTarget = self.oneHotEncoder(testTarget)

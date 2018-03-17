@@ -9,7 +9,6 @@
     "learning_rate": 0.005,
     "weight_decay": 0.01,
 
-    "one_hot": true,
     "adam": false,
   
     "max_to_keep": 5,
