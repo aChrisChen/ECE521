@@ -38,13 +38,12 @@ class BaseModel(object):
         raise NotImplementedError
 
 
-class LogisticClassification(BaseModel):
+class LogisticRegression(BaseModel):
     def __init__(self, config):
-        super(LogisticClassification, self).__init__(config)
+        super(LogisticRegression, self).__init__(config)
 
-        self.BATCH_SIZE = self.config.batch_size
-        self.input_size = self.config.input_size
-        self.IMAGE_SIZE = int(math.sqrt(self.input_size))
+        self.BATCH_SIZE = self.config.train_batch_size
+        self.IMAGE_SIZE = self.config.image_size
         self.output_size = self.config.output_size
         self.weight_decay = float(self.config.weight_decay)
 
@@ -92,9 +91,8 @@ class LinearRegression(BaseModel):
     def __init__(self, config):
         super(LinearRegression, self).__init__(config)
 
-        self.BATCH_SIZE = self.config.batch_size
-        self.input_size = self.config.input_size
-        self.IMAGE_SIZE = int(math.sqrt(self.input_size))
+        self.BATCH_SIZE = self.config.train_batch_size
+        self.IMAGE_SIZE = self.config.image_size
         self.output_size = self.config.output_size
         self.weight_decay = float(self.config.weight_decay)
 

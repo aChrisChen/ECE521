@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 from sklearn.preprocessing import OneHotEncoder
 
-class DataGenerator():
+class DataLoader():
     def __init__(self, sess, config):
         self.config = config
         self.sess = sess
@@ -43,10 +43,18 @@ class DataGenerator():
         validData, validTarget = Data[3500:3600], Target[3500:3600]
         testData, testTarget = Data[3600:], Target[3600:]
 
+        # one hot switch
         if self.config.one_hot:
             trainTarget = self.oneHotEncoder(trainTarget)
             validTarget = self.oneHotEncoder(validTarget)
             testTarget = self.oneHotEncoder(testTarget)
+
+        # auto detect data size
+        config.image_size = np.shape(trainData)[1]
+        config.train_total_size = np.shape(trainData)[0]
+        config.valid_batch_size = np.shape(validData)[0]
+        config.test_batch_size = np.shape(testData)[0]
+        config.output_size = np.shape(trainTarget)[1]
 
         return [trainData, trainTarget], [validData, validTarget], [testData, testTarget]
 
@@ -63,10 +71,18 @@ class DataGenerator():
         validData, validTarget = Data[15000:16000], Target[15000:16000]
         testData, testTarget = Data[16000:], Target[16000:]
 
+        # one hot switch
         if self.config.one_hot:
             trainTarget = self.oneHotEncoder(trainTarget)
             validTarget = self.oneHotEncoder(validTarget)
             testTarget = self.oneHotEncoder(testTarget)
+
+        # auto detect data size
+        config.image_size = np.shape(trainData)[1]
+        config.train_total_size = np.shape(trainData)[0]
+        config.valid_batch_size = np.shape(validData)[0]
+        config.test_batch_size = np.shape(testData)[0]
+        config.output_size = np.shape(trainTarget)[1]
 
         return [trainData, trainTarget], [validData, validTarget], [testData, testTarget]
 
@@ -94,10 +110,18 @@ class DataGenerator():
         validTarget = validTarget[:, np.newaxis]
         testTarget = testTarget[:, np.newaxis]
 
+        # one hot switch
         if self.config.one_hot:
             trainTarget = self.oneHotEncoder(trainTarget)
             validTarget = self.oneHotEncoder(validTarget)
             testTarget = self.oneHotEncoder(testTarget)
+
+        # auto detect data size
+        config.image_size = np.shape(trainData)[1]
+        config.train_total_size = np.shape(trainData)[0]
+        config.valid_batch_size = np.shape(validData)[0]
+        config.test_batch_size = np.shape(testData)[0]
+        config.output_size = np.shape(trainTarget)[1]
 
         return [trainData, trainTarget], [validData, validTarget], [testData, testTarget]
 
@@ -106,10 +130,10 @@ class DataGenerator():
         self.max_value = tf.placeholder(tf.int64, shape=[])
 
         features, labels = self.trainDataset[0], self.trainDataset[1]
-        dataset = tf.data.Dataset.from_tensor_slices((features, labels)).batch(self.config.batch_size)
+        dataset = tf.data.Dataset.from_tensor_slices((features, labels)).batch(self.config.train_batch_size)
         self.train_iter = dataset.make_initializable_iterator()
         self.train_next_element = self.train_iter.get_next()
-        self.sess.run(self.train_iter.initializer, feed_dict={self.max_value: self.config.batch_size})
+        self.sess.run(self.train_iter.initializer, feed_dict={self.max_value: self.config.train_batch_size})
 
         features, labels = self.validDataset[0], self.validDataset[1]
         dataset = tf.data.Dataset.from_tensor_slices((features, labels)).batch(self.config.valid_batch_size)
@@ -129,7 +153,7 @@ class DataGenerator():
             try:
                 self.next = self.sess.run(self.train_next_element)
             except tf.errors.OutOfRangeError:
-                self.sess.run(self.train_iter.initializer, feed_dict={self.max_value: self.config.batch_size})
+                self.sess.run(self.train_iter.initializer, feed_dict={self.max_value: self.config.train_batch_size})
                 self.next = self.sess.run(self.train_next_element)
             return self.next
         if split == 'valid':

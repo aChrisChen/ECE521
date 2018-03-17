@@ -16,14 +16,17 @@ def train(sess, data, model, config, logger):
     global_valid_acc_list = []
     global_test_acc_list = []
 
+    # calculate epoch info
+    num_iter_per_epoch = int(np.ceil(config.train_total_size / config.train_batch_size))
+    num_epochs = int(np.ceil(config.num_iter / num_iter_per_epoch))
     # train for each epoch
-    for cur_epoch in range(model.cur_epoch_tensor.eval(sess), config.num_epochs + 1, 1):
+    for cur_epoch in range(model.cur_epoch_tensor.eval(sess), num_epochs + 1, 1):
 
         #### Training ####
         # initial:use list to record each step(iteration)
         loss_list = []
         acc_list = []
-        for iter in tqdm(range(config.num_iter_per_epoch)):
+        for iter in tqdm(range(num_iter_per_epoch)):
             cur_iter = model.global_step_tensor.eval(sess) + 1
             if cur_iter > config.num_iter:
                 break

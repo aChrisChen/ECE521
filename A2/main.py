@@ -1,11 +1,12 @@
 import tensorflow as tf
 
-#from data_loader.data_generator import DataGenerator
-from model import*
-from train import*
-from utils import*
-from logger import*
-from data_generator import *
+from model import *
+from train import *
+from utils import *
+from logger import *
+from data_loader import *
+from plot import *
+
 def main():
     # capture the config
     try:
@@ -26,10 +27,10 @@ def main():
 
     # sess = tf.Session()
     sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
-    training_data = DataGenerator(sess, config)
+    training_data = DataLoader(sess, config)
     print(training_data)
     if config.logistic:
-        model = LogisticClassification(config)
+        model = LogisticRegression(config)
     else:
         model = LinearRegression(config)
     logger = Logger(sess, config)
