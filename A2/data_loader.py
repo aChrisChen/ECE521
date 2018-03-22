@@ -19,6 +19,9 @@ class DataLoader():
             self.trainDataset, self.validDataset, self.testDataset = self.notMNISTDataset10()
         elif name_dataset == 'FaceScrub':
             self.trainDataset, self.validDataset, self.testDataset = self.faceDataset(self.config.face_task)
+        elif name_dataset == 'notMNIST_A3':
+            self.trainDataset, self.validDataset, self.testDataset = self.notMNIST_A3()
+
         else:
             print('no dataset')
 
@@ -125,6 +128,31 @@ class DataLoader():
 
         return [trainData, trainTarget], [validData, validTarget], [testData, testTarget]
 
+
+    def notMNIST_A3(self):
+        with np.load("data/notMNIST.npz") as data:
+            Data, Target = data["images"], data["labels"]
+            np.random.seed(521)
+            randIndx = np.arange(len(Data))
+            np.random.shuffle(randIndx)
+            Data = Data[randIndx] / 255.
+            Target = Target[randIndx]
+            trainData, trainTarget = Data[:15000], Target[:15000]
+            validData, validTarget = Data[15000:16000], Target[15000:16000]
+            testData, testTarget = Data[16000:], Target[16000:]
+
+            trainTarget = self.oneHotEncoder(trainTarget)
+            validTarget = self.oneHotEncoder(validTarget)
+            testTarget = self.oneHotEncoder(testTarget)
+
+            # auto detect data size
+            self.config.image_size = np.shape(trainData)[1]
+            self.config.train_total_size = np.shape(trainData)[0]
+            self.config.valid_batch_size = np.shape(validData)[0]
+            self.config.test_batch_size = np.shape(testData)[0]
+            self.config.output_size = np.shape(trainTarget)[1]
+
+            return [trainData, trainTarget], [validData, validTarget], [testData, testTarget]
 
     def dataloader(self):
         self.max_value = tf.placeholder(tf.int64, shape=[])

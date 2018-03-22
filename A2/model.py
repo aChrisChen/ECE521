@@ -130,9 +130,11 @@ class LinearRegression(BaseModel):
 
 class MLP(BaseModel):
     def __init__(self, config):
-        super(LogisticRegression, self).__init__(config)
+        super(MLP, self).__init__(config)
 
         self.num_hidden_layer = config.num_hidden_layer
+        self.hidden1_size = config.hidden1_size
+        self.hidden2_size = config.hidden2_size
 
         self.BATCH_SIZE = self.config.train_batch_size
         self.IMAGE_SIZE = self.config.image_size

@@ -29,10 +29,13 @@ def main():
     sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
     training_data = DataLoader(sess, config)
     print(training_data)
-    if config.logistic:
-        model = LogisticRegression(config)
-    else:
-        model = LinearRegression(config)
+    # if config.logistic:
+    #     model = LogisticRegression(config)
+    # else:
+    #     model = LinearRegression(config)
+
+    model = MLP(config)
+    #model = LogisticRegression(config)
     logger = Logger(sess, config)
 
     with tf.device(device_name):
