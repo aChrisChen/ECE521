@@ -127,3 +127,74 @@ class LinearRegression(BaseModel):
 
     def init_saver(self):
         self.saver = tf.train.Saver(max_to_keep=self.config.max_to_keep)
+
+class MLP(BaseModel):
+    def __init__(self, config):
+        super(LogisticRegression, self).__init__(config)
+
+        self.num_hidden_layer = config.num_hidden_layer
+
+        self.BATCH_SIZE = self.config.train_batch_size
+        self.IMAGE_SIZE = self.config.image_size
+        self.output_size = self.config.output_size
+        self.weight_decay = float(self.config.weight_decay)
+
+
+        self.build_model()
+        self.loss()
+        self.init_saver()
+
+    def build_model(self):
+        self.is_training = tf.placeholder(tf.bool)
+        self.x = tf.placeholder(tf.float32, shape=(None, self.IMAGE_SIZE, self.IMAGE_SIZE))
+        self.y = tf.placeholder(tf.float32, shape=(None, self.output_size))
+
+        self.input = tf.reshape(self.x, [-1, self.IMAGE_SIZE * self.IMAGE_SIZE])
+
+        if self.num_hidden_layer == 1:
+            hidden1 = tf.layers.dense(inputs= self.input,\
+                                      units= self.hidden1_size,\
+                                      activation=tf.nn.relu,\
+                                      name= 'hidden1')
+            self.output = tf.layers.dense(hidden1, \
+                                      units=self.config.output_size, \
+                                      name='output')
+        else:
+            hidden1 = tf.layers.dense(inputs=self.input, \
+                                      units=self.hidden1_size, \
+                                      activation=tf.nn.relu, \
+                                      name='hidden1')
+            hidden2 = tf.layers.dense(inputs=hidden1, \
+                                      units=self.hidden2_size, \
+                                      activation=tf.nn.relu, \
+                                      name='hidden2')
+
+            self.output = tf.layers.dense(hidden2, \
+                                          units=self.config.output_size, \
+                                          name='output')
+
+
+    def loss(self):
+        # loss
+        if self.config.output_size == 2:
+            self.cross_e = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=self.y, logits=self.output))
+        else:
+            self.cross_e = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=self.y, logits=self.output))
+
+        # self.weight_decay_loss = tf.losses.get_regularization_loss()
+        #
+        # self.total_loss = self.cross_e + self.weight_decay_loss
+
+        self.total_loss = self.cross_e
+        # accuracy
+        self.prediction = tf.argmax(self.output,1)
+        self.accuracy = tf.reduce_mean(tf.cast(tf.equal(self.prediction, tf.argmax(self.y,1)), tf.float32))
+
+        # update parameters
+        if self.config.adam:
+            self.train_step = tf.train.AdamOptimizer(self.config.learning_rate).minimize(self.total_loss, global_step=self.global_step_tensor)
+        else:
+            self.train_step = tf.train.GradientDescentOptimizer(self.config.learning_rate).minimize(self.total_loss, global_step=self.global_step_tensor)
+
+    def init_saver(self):
+        self.saver = tf.train.Saver(max_to_keep=self.config.max_to_keep)
