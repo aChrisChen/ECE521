@@ -1,28 +1,23 @@
 {
-  "exp_name": "2.1.2.1",
-  "num_iter": 20000,
-  "batch_size": 500,
-  "num_iter_per_epoch": 7,
-  "num_epochs": 2858,
-  "learning_rate": 0.001,
-  "weight_decay": 0.01,
-  "input_size": 784,
-  "one_hot": true,
-  "output_size": 2,
-  "adam": false,
 
-  "valid_batch_size": 100,
-  "test_batch_size": 145,
-
-  "max_to_keep": 5,
+  "exp_name": "example",
   "dataset": "notMNIST_2",
   "face_task": 0,
 
+  "num_iter": 5000,
+  "train_batch_size": 500,
+
+  "learning_rate": 0.005,
+  "weight_decay": 0.01,
+
   "logistic": true,
+  "adam": false,
+
+  "max_to_keep": 5,
 
   "validation_interval": 7,
 
-  "gpu": false
+  "gpu": false,
 
 
   "num_hidden_layer": 1,
