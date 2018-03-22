@@ -44,17 +44,17 @@ class DataLoader():
         testData, testTarget = Data[3600:], Target[3600:]
 
         # one hot switch
-        if not self.config.logistic:
+        if self.config.logistic:
             trainTarget = self.oneHotEncoder(trainTarget)
             validTarget = self.oneHotEncoder(validTarget)
             testTarget = self.oneHotEncoder(testTarget)
 
         # auto detect data size
-        config.image_size = np.shape(trainData)[1]
-        config.train_total_size = np.shape(trainData)[0]
-        config.valid_batch_size = np.shape(validData)[0]
-        config.test_batch_size = np.shape(testData)[0]
-        config.output_size = np.shape(trainTarget)[1]
+        self.config.image_size = np.shape(trainData)[1]
+        self.config.train_total_size = np.shape(trainData)[0]
+        self.config.valid_batch_size = np.shape(validData)[0]
+        self.config.test_batch_size = np.shape(testData)[0]
+        self.config.output_size = np.shape(trainTarget)[1]
 
         return [trainData, trainTarget], [validData, validTarget], [testData, testTarget]
 
@@ -72,17 +72,17 @@ class DataLoader():
         testData, testTarget = Data[16000:], Target[16000:]
 
         # one hot switch
-        if not self.config.logistic:
+        if self.config.logistic:
             trainTarget = self.oneHotEncoder(trainTarget)
             validTarget = self.oneHotEncoder(validTarget)
             testTarget = self.oneHotEncoder(testTarget)
 
         # auto detect data size
-        config.image_size = np.shape(trainData)[1]
-        config.train_total_size = np.shape(trainData)[0]
-        config.valid_batch_size = np.shape(validData)[0]
-        config.test_batch_size = np.shape(testData)[0]
-        config.output_size = np.shape(trainTarget)[1]
+        self.config.image_size = np.shape(trainData)[1]
+        self.config.train_total_size = np.shape(trainData)[0]
+        self.config.valid_batch_size = np.shape(validData)[0]
+        self.config.test_batch_size = np.shape(testData)[0]
+        self.config.output_size = np.shape(trainTarget)[1]
 
         return [trainData, trainTarget], [validData, validTarget], [testData, testTarget]
 
@@ -111,17 +111,17 @@ class DataLoader():
         testTarget = testTarget[:, np.newaxis]
 
         # one hot switch
-        if not self.config.logistic:
+        if self.config.logistic:
             trainTarget = self.oneHotEncoder(trainTarget)
             validTarget = self.oneHotEncoder(validTarget)
             testTarget = self.oneHotEncoder(testTarget)
 
         # auto detect data size
-        config.image_size = np.shape(trainData)[1]
-        config.train_total_size = np.shape(trainData)[0]
-        config.valid_batch_size = np.shape(validData)[0]
-        config.test_batch_size = np.shape(testData)[0]
-        config.output_size = np.shape(trainTarget)[1]
+        self.config.image_size = np.shape(trainData)[1]
+        self.config.train_total_size = np.shape(trainData)[0]
+        self.config.valid_batch_size = np.shape(validData)[0]
+        self.config.test_batch_size = np.shape(testData)[0]
+        self.config.output_size = np.shape(trainTarget)[1]
 
         return [trainData, trainTarget], [validData, validTarget], [testData, testTarget]
 
