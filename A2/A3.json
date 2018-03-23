@@ -1,11 +1,11 @@
 {
-  "mode": "Inference",
+  "mode": "Train",
 
-  "exp_name": "example",
+  "exp_name": "example2_nodropout",
   "dataset": "notMNIST_A3",
   "face_task": 0,
 
-  "num_iter": 500,
+  "num_iter": 5000,
   "train_batch_size": 100,
 
   "learning_rate": 0.005,
@@ -16,16 +16,16 @@
 
   "max_to_keep": 5,
 
-  "validation_interval": 100,
+  "validation_interval": 50,
 
   "gpu": false,
 
 
   "num_hidden_layer": 1,
-  "hidden1_size": 500,
+  "hidden1_size": 1000,
   "hidden2_size": 500,
 
-  "dropout_rate": 0.5,
+  "dropout_rate": 0,
 
   "idx_unit_hidden1_visualization": 1
 }

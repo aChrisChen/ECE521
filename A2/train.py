@@ -68,10 +68,10 @@ def train(sess, data, model, config, logger):
 
 
 
-    #### Test after training ####
-    test_loss, test_acc = evaluate(sess, data, model, 'test', config)
-    global_test_loss_list.append(test_loss)
-    global_test_acc_list.append(test_acc)
+    # #### Test after training ###
+    # test_loss, test_acc = evaluate(sess, data, model, 'test', config)
+    # global_test_loss_list.append(test_loss)
+    # global_test_acc_list.append(test_acc)
 
     # np.savez(os.path.join("npz",config.dataset,("%d_%f_%f_%s_%s_%s.npz")%(config.num_iter, config.learning_rate, config.weight_decay, config.logistic, config.adam, config.exp_name)), \
     #          train_loss=global_train_loss_list, \
