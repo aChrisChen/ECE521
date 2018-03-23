@@ -161,6 +161,7 @@ class MLP(BaseModel):
                                       units= self.hidden1_size, \
                                       kernel_initializer= tf.contrib.layers.xavier_initializer(), \
                                       bias_initializer=tf.zeros_initializer(), \
+                                      kernel_regularizer=tf.contrib.layers.l2_regularizer(self.weight_decay), \
                                       activation=tf.nn.relu,\
                                       name= 'hidden1')
             dropout1 = tf.layers.dropout(inputs=hidden1, \
@@ -174,6 +175,7 @@ class MLP(BaseModel):
                                       units=self.hidden1_size, \
                                       kernel_initializer=tf.contrib.layers.xavier_initializer(), \
                                       bias_initializer=tf.zeros_initializer(), \
+                                      kernel_regularizer=tf.contrib.layers.l2_regularizer(self.weight_decay), \
                                       activation=tf.nn.relu, \
                                       name='hidden1')
             dropout1 = tf.layers.dropout(inputs=hidden1, \
@@ -182,7 +184,8 @@ class MLP(BaseModel):
             hidden2 = tf.layers.dense(inputs=dropout1, \
                                       units=self.hidden2_size, \
                                       kernel_initializer=tf.contrib.layers.xavier_initializer(), \
-                                      bias_initializer=tf.zeros_initializer(),\
+                                      bias_initializer=tf.zeros_initializer(), \
+                                      kernel_regularizer=tf.contrib.layers.l2_regularizer(self.weight_decay), \
                                       activation=tf.nn.relu, \
                                       name='hidden2')
             dropout2 = tf.layers.dropout(inputs=hidden2, \
@@ -200,11 +203,11 @@ class MLP(BaseModel):
         else:
             self.cross_e = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=self.y, logits=self.output))
 
-        # self.weight_decay_loss = tf.losses.get_regularization_loss()
-        #
-        # self.total_loss = self.cross_e + self.weight_decay_loss
+        self.weight_decay_loss = tf.losses.get_regularization_loss()
 
-        self.total_loss = self.cross_e
+        self.total_loss = self.cross_e + self.weight_decay_loss
+
+        #self.total_loss = self.cross_e
         # accuracy
         self.prediction = tf.argmax(self.output,1)
         self.accuracy = tf.reduce_mean(tf.cast(tf.equal(self.prediction, tf.argmax(self.y,1)), tf.float32))
