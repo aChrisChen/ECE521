@@ -2,6 +2,9 @@ import json
 from bunch import Bunch
 import os
 import argparse
+import tensorflow as tf
+import matplotlib.pyplot as plt
+import numpy as np
 
 def get_args():
     argparser = argparse.ArgumentParser(description = __doc__)
@@ -41,3 +44,13 @@ def process_config(json_file):
     config.checkpoint_dir = os.path.join(".../experiments", config.exp_name, "checkpoint")
     config.plot_dir = os.path.join(".../experiments", config.exp_name, "plot")
     return config
+
+def visualize_layer1(sess, idx_unit):
+    var_hidden1 = [v for v in tf.trainable_variables() if v.name == "hidden1/kernel:0"][0]
+    weight_hidden1= sess.run(var_hidden1)
+    weight_selected = weight_hidden1[:,idx_unit-1]
+    weight_selected = weight_selected.reshape([28, 28])
+    plt.imshow(weight_selected)
+    #plt.show()
+    plt.savefig('visulization_unit'+ str(idx_unit)+'.png')
+
