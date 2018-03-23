@@ -27,8 +27,8 @@ def main():
 
     # sess = tf.Session()
     sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
-    training_data = DataLoader(sess, config)
-    print(training_data)
+    data = DataLoader(sess, config)
+    print(data)
     # if config.logistic:
     #     model = LogisticRegression(config)
     # else:
@@ -38,8 +38,13 @@ def main():
     #model = LogisticRegression(config)
     logger = Logger(sess, config)
 
-    with tf.device(device_name):
-        train(sess, training_data, model, config, logger)
+    if config.mode == "Train":
+        with tf.device(device_name):
+            train(sess, data, model, config, logger)
+    elif config.mode == "Inference":
+        model.load(sess, file_name='example-125')
+        test_loss, test_acc = evaluate(sess, data, model, 'test', config)
+        print("Test Loss: %f, Test Accuracy: %f" % (test_loss, test_acc))
 
 
 

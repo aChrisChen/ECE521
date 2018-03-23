@@ -169,7 +169,7 @@ class DataLoader():
         self.valid_next_element = self.valid_iter.get_next()
         self.sess.run(self.valid_iter.initializer, feed_dict={self.max_value: self.config.valid_batch_size})
 
-        features, labels = self.trainDataset[0], self.trainDataset[1]
+        features, labels = self.testDataset[0], self.testDataset[1]
         dataset = tf.data.Dataset.from_tensor_slices((features, labels)).batch(self.config.test_batch_size)
         self.test_iter = dataset.make_initializable_iterator()
         self.test_next_element = self.test_iter.get_next()

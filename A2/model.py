@@ -12,12 +12,21 @@ class BaseModel(object):
         print("Saving model...")
         self.saver.save(sess, os.path.join(self.config.checkpoint_dir, self.config.exp_name), self.global_step_tensor)
 
-    def load(self, sess):
-        latest_checkpoint = tf.train.latest_checkpoint(os.path.join(self.config.checkpoint_dir, self.config.exp_name), self.config.exp_name)
-        if latest_checkpoint:
-            print("Loading model checkpoint {} ... \n".format(latest_checkpoint))
-            self.saver.restore(sess, latest_checkpoint)
+    def load(self, sess, file_name=0 ):
+        if file_name == 0:
+            latest_checkpoint = tf.train.latest_checkpoint(self.config.checkpoint_dir)
+            if latest_checkpoint:
+                print("Loading model checkpoint {} ... \n".format(latest_checkpoint))
+                self.saver.restore(sess, latest_checkpoint)
+                print("Model loaded")
+            else:
+                print("Model loaded fail")
+        else:
+            selected_checkpoint = os.path.join(self.config.checkpoint_dir,file_name)
+            print("Loading model checkpoint {} ... \n".format(selected_checkpoint))
+            self.saver.restore(sess, selected_checkpoint)
             print("Model loaded")
+
 
     def init_cur_epoch(self):
         with tf.variable_scope('cur_epoch'):
