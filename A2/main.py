@@ -42,5 +42,6 @@ def main():
         train(sess, training_data, model, config, logger)
 
 
+
 if __name__ == '__main__':
     main()

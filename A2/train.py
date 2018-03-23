@@ -33,6 +33,11 @@ def train(sess, data, model, config, logger):
             loss, acc= train_step(sess, data, model, config)
             loss_list.append(loss)
             acc_list.append(acc)
+
+            # Checkpoints save at 25%, 50%, 75%, 100%
+            if cur_iter % (config.num_iter * 0.25) == 0:
+                model.save(sess)
+
         global_train_loss_list.append(loss)
         global_train_acc_list.append(acc)
         if cur_iter > config.num_iter:
@@ -61,18 +66,20 @@ def train(sess, data, model, config, logger):
 
 
 
+
+
     #### Test after training ####
     test_loss, test_acc = evaluate(sess, data, model, 'test', config)
     global_test_loss_list.append(test_loss)
     global_test_acc_list.append(test_acc)
 
-    np.savez(os.path.join("npz",config.dataset,("%d_%f_%f_%s_%s_%s.npz")%(config.num_iter, config.learning_rate, config.weight_decay, config.logistic, config.adam, config.exp_name)), \
-             train_loss=global_train_loss_list, \
-             valid_loss=global_valid_loss_list, \
-             test_loss=global_test_loss_list, \
-             train_acc=global_train_acc_list, \
-             valid_acc=global_valid_acc_list, \
-             test_acc=global_test_acc_list)
+    # np.savez(os.path.join("npz",config.dataset,("%d_%f_%f_%s_%s_%s.npz")%(config.num_iter, config.learning_rate, config.weight_decay, config.logistic, config.adam, config.exp_name)), \
+    #          train_loss=global_train_loss_list, \
+    #          valid_loss=global_valid_loss_list, \
+    #          test_loss=global_test_loss_list, \
+    #          train_acc=global_train_acc_list, \
+    #          valid_acc=global_valid_acc_list, \
+    #          test_acc=global_test_acc_list)
 
 
 def train_step(sess, data, model, config):
