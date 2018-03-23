@@ -158,7 +158,9 @@ class MLP(BaseModel):
 
         if self.num_hidden_layer == 1:
             hidden1 = tf.layers.dense(inputs= self.input,\
-                                      units= self.hidden1_size,\
+                                      units= self.hidden1_size, \
+                                      kernel_initializer= tf.contrib.layers.xavier_initializer(), \
+                                      bias_initializer=tf.zeros_initializer(), \
                                       activation=tf.nn.relu,\
                                       name= 'hidden1')
             dropout1 = tf.layers.dropout(inputs=hidden1, \
@@ -170,6 +172,8 @@ class MLP(BaseModel):
         else:
             hidden1 = tf.layers.dense(inputs=self.input, \
                                       units=self.hidden1_size, \
+                                      kernel_initializer=tf.contrib.layers.xavier_initializer(), \
+                                      bias_initializer=tf.zeros_initializer(), \
                                       activation=tf.nn.relu, \
                                       name='hidden1')
             dropout1 = tf.layers.dropout(inputs=hidden1, \
@@ -177,6 +181,8 @@ class MLP(BaseModel):
                                          training=self.mode)
             hidden2 = tf.layers.dense(inputs=dropout1, \
                                       units=self.hidden2_size, \
+                                      kernel_initializer=tf.contrib.layers.xavier_initializer(), \
+                                      bias_initializer=tf.zeros_initializer(),\
                                       activation=tf.nn.relu, \
                                       name='hidden2')
             dropout2 = tf.layers.dropout(inputs=hidden2, \
