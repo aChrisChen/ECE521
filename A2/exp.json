@@ -10,7 +10,7 @@
     "weight_decay": 0.01,
 
     "logistic": true,
-    "adam": false,
+    "adam": true,
   
     "max_to_keep": 5,
   

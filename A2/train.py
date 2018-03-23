@@ -46,6 +46,8 @@ def train(sess, data, model, config, logger):
         summary_dict['acc'] = training_acc
         logger.summarize(cur_iter, summarizer= "train", summaries_dict= summary_dict)
 
+
+
         #### Validation ####
         if cur_iter % config.validation_interval == 0:
             valid_loss, valid_acc = evaluate(sess, data, model, 'valid', config)
@@ -56,6 +58,8 @@ def train(sess, data, model, config, logger):
             summary_dict['loss'] = valid_loss
             summary_dict['acc'] = valid_acc
             logger.summarize(cur_iter, summarizer="valid", summaries_dict=summary_dict)
+
+
 
     #### Test after training ####
     test_loss, test_acc = evaluate(sess, data, model, 'test', config)
@@ -72,6 +76,9 @@ def train(sess, data, model, config, logger):
 
 
 def train_step(sess, data, model, config):
+    # turn on dropout
+    model.mode = True
+
     batch_x, batch_y = data.next_batch('train')
     feed_dict = {model.x: batch_x, model.y: batch_y, model.is_training: True}
     if config.logistic:
@@ -85,6 +92,9 @@ def train_step(sess, data, model, config):
 
 
 def evaluate(sess, data, model, split, config):
+    # turn off dropout
+    model.mode = False
+
     batch_x, batch_y = data.next_batch(split)
     feed_dict = {model.x: batch_x, model.y: batch_y, model.is_training: False}
     if config.logistic:

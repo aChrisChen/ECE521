@@ -141,6 +141,9 @@ class MLP(BaseModel):
         self.output_size = self.config.output_size
         self.weight_decay = float(self.config.weight_decay)
 
+        self.mode = False
+        self.dropout_rate = config.dropout_rate
+
 
         self.build_model()
         self.loss()
@@ -158,7 +161,10 @@ class MLP(BaseModel):
                                       units= self.hidden1_size,\
                                       activation=tf.nn.relu,\
                                       name= 'hidden1')
-            self.output = tf.layers.dense(hidden1, \
+            dropout1 = tf.layers.dropout(inputs=hidden1, \
+                                         rate=self.dropout_rate, \
+                                         training=self.mode)
+            self.output = tf.layers.dense(dropout1, \
                                       units=self.config.output_size, \
                                       name='output')
         else:
@@ -166,12 +172,17 @@ class MLP(BaseModel):
                                       units=self.hidden1_size, \
                                       activation=tf.nn.relu, \
                                       name='hidden1')
-            hidden2 = tf.layers.dense(inputs=hidden1, \
+            dropout1 = tf.layers.dropout(inputs=hidden1, \
+                                         rate=self.dropout_rate, \
+                                         training=self.mode)
+            hidden2 = tf.layers.dense(inputs=dropout1, \
                                       units=self.hidden2_size, \
                                       activation=tf.nn.relu, \
                                       name='hidden2')
-
-            self.output = tf.layers.dense(hidden2, \
+            dropout2 = tf.layers.dropout(inputs=hidden2, \
+                                         rate=self. dropout_rate, \
+                                         training=self.mode)
+            self.output = tf.layers.dense(dropout2, \
                                           units=self.config.output_size, \
                                           name='output')
 
