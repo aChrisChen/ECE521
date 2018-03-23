@@ -45,12 +45,12 @@ def process_config(json_file):
     config.plot_dir = os.path.join(".../experiments", config.exp_name, "plot")
     return config
 
-def visualize_layer1(sess, idx_unit):
+def visualize_layer1(sess, idx_unit, checkpoint_name):
     var_hidden1 = [v for v in tf.trainable_variables() if v.name == "hidden1/kernel:0"][0]
     weight_hidden1= sess.run(var_hidden1)
     weight_selected = weight_hidden1[:,idx_unit-1]
     weight_selected = weight_selected.reshape([28, 28])
     plt.imshow(weight_selected)
     #plt.show()
-    plt.savefig('visulization_unit'+ str(idx_unit)+'.png')
+    plt.savefig('visulization_unit'+ str(idx_unit)+ '-'+ checkpoint_name +'.png')
 
