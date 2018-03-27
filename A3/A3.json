@@ -1,14 +1,14 @@
 {
   "mode": "Train",
 
-  "exp_name": "example2_nodropout",
+  "exp_name": "1.1.1_lr=0.001",
   "dataset": "notMNIST_10",
   "face_task": 0,
 
-  "num_iter": 50000,
+  "num_iter": 100000,
   "train_batch_size": 100,
 
-  "learning_rate": 0.005,
+  "learning_rate": 0.001,
   "weight_decay": 0.0003,
 
   "adam": false,
