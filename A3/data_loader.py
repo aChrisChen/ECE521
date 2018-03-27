@@ -85,10 +85,10 @@ class DataLoader():
             return self.next
         else:
             try:
-                self.nect = self.sess.run(self.test_next_element)
+                self.next = self.sess.run(self.test_next_element)
             except tf.errors.OutOfRangeError:
                 self.sess.run(self.test_iter.initializer, feed_dict={self.max_value: self.config.test_batch_size})
-                self.nect = self.sess.run(self.test_next_element)
+                self.next = self.sess.run(self.test_next_element)
             return self.next
 
 
