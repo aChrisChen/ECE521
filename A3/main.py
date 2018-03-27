@@ -38,7 +38,7 @@ def main():
         with tf.device(device_name):
             train(sess, data, model, config, logger)
     elif config.mode == "Inference":
-        name_checkpoint = 'example2_nodropout-12500'
+        name_checkpoint = config.checkpoint
         model.load(sess, file_name=name_checkpoint)
         test_loss, test_acc = evaluate(sess, data, model, 'test', config)
         print("Test Loss: %f, Test Accuracy: %f" % (test_loss, test_acc))
