@@ -294,8 +294,8 @@ def main():
     plt.clf()
     plt.semilogx(train_acc_x1, train_acc_y1, '--', label = "train, dropout_rate = 0")
     plt.semilogx(train_acc_x2, train_acc_y2, '--', label = "train, dropout_rate = 0.5")
-    plt.semilogx(valid_acc_x1, valid_acc_y1, label = "valid, dropout_rate = 0")
-    plt.semilogx(valid_acc_x2, valid_acc_y2, label = "valid, dropout_rate = 0.5")
+    plt.semilogx(valid_acc_x1, valid_acc_y1, label = "valid, dropout_rate = 0", zorder = 10)
+    plt.semilogx(valid_acc_x2, valid_acc_y2, label = "valid, dropout_rate = 0.5", zorder = 5)
     plt.legend()
 
     plt.title("Training and Validation Accuracy versus Number of Epochs")
