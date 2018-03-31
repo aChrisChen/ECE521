@@ -55,12 +55,12 @@ def main():
 
     plt.figure(1)
     plt.clf()
-    plt.semilogx(train_loss_x1, train_loss_y1, '--', label = "train, lr = 0.001")
-    plt.semilogx(train_loss_x2, train_loss_y2, '--', label = "train, lr = 0.003")
-    plt.semilogx(train_loss_x3, train_loss_y3, '--', label = "train, lr = 0.01")
-    plt.semilogx(valid_loss_x1, valid_loss_y1, label = "valid, lr = 0.001")
-    plt.semilogx(valid_loss_x2, valid_loss_y2, label = "valid, lr = 0.003")
-    plt.semilogx(valid_loss_x3, valid_loss_y3, label = "valid, lr = 0.01")
+    plt.semilogx(train_loss_x1, train_loss_y1, '--', label = "train, learning rate = 0.001")
+    plt.semilogx(train_loss_x2, train_loss_y2, '--', label = "train, learning rate = 0.003")
+    plt.semilogx(train_loss_x3, train_loss_y3, '--', label = "train, learning rate = 0.01")
+    plt.semilogx(valid_loss_x1, valid_loss_y1, label = "valid, learning rate = 0.001")
+    plt.semilogx(valid_loss_x2, valid_loss_y2, label = "valid, learning rate = 0.003")
+    plt.semilogx(valid_loss_x3, valid_loss_y3, label = "valid, learning rate = 0.01")
     plt.legend()
 
     plt.title("Training and Validation Loss versus Number of Epochs")
@@ -70,12 +70,12 @@ def main():
 
     plt.figure(2)
     plt.clf()
-    plt.semilogx(train_acc_x1, train_acc_y1, '--', label = "train, lr = 0.001")
-    plt.semilogx(train_acc_x2, train_acc_y2, '--', label = "train, lr = 0.003")
-    plt.semilogx(train_acc_x3, train_acc_y3, '--', label = "train, lr = 0.01")
-    plt.semilogx(valid_acc_x1, valid_acc_y1, label = "valid, lr = 0.001")
-    plt.semilogx(valid_acc_x2, valid_acc_y2, label = "valid, lr = 0.003")
-    plt.semilogx(valid_acc_x3, valid_acc_y3, label = "valid, lr = 0.01")
+    plt.semilogx(train_acc_x1, train_acc_y1, '--', label = "train, learning rate = 0.001")
+    plt.semilogx(train_acc_x2, train_acc_y2, '--', label = "train, learning rate = 0.003")
+    plt.semilogx(train_acc_x3, train_acc_y3, '--', label = "train, learning rate = 0.01")
+    plt.semilogx(valid_acc_x1, valid_acc_y1, label = "valid, learning rate = 0.001")
+    plt.semilogx(valid_acc_x2, valid_acc_y2, label = "valid, learning rate = 0.003")
+    plt.semilogx(valid_acc_x3, valid_acc_y3, label = "valid, learning rate = 0.01")
     plt.legend()
 
     plt.title("Training and Validation Accuracy versus Number of Epochs")
@@ -85,9 +85,9 @@ def main():
 
     plt.figure(3)
     plt.clf()
-    plt.semilogx(test_loss_x1, test_loss_y1, label = "test, lr = 0.001")
-    plt.semilogx(test_loss_x2, test_loss_y2, label = "test, lr = 0.003")
-    plt.semilogx(test_loss_x3, test_loss_y3, label = "test, lr = 0.01")
+    plt.semilogx(test_loss_x1, test_loss_y1, label = "test, learning rate = 0.001")
+    plt.semilogx(test_loss_x2, test_loss_y2, label = "test, learning rate = 0.003")
+    plt.semilogx(test_loss_x3, test_loss_y3, label = "test, learning rate = 0.01")
     plt.legend()
 
     plt.title("Test Loss versus Number of Epochs")
@@ -97,9 +97,9 @@ def main():
 
     plt.figure(4)
     plt.clf()
-    plt.semilogx(test_acc_x1, test_acc_y1, label = "test, lr = 0.001")
-    plt.semilogx(test_acc_x2, test_acc_y2, label = "test, lr = 0.003")
-    plt.semilogx(test_acc_x3, test_acc_y3, label = "test, lr = 0.01")
+    plt.semilogx(test_acc_x1, test_acc_y1, label = "test, learning rate = 0.001")
+    plt.semilogx(test_acc_x2, test_acc_y2, label = "test, learning rate = 0.003")
+    plt.semilogx(test_acc_x3, test_acc_y3, label = "test, learning rate = 0.01")
     plt.legend()
 
     plt.title("Test Accuracy versus Number of Epochs")
